@@ -7,7 +7,7 @@ def scrape_stories():
     # ৫টি ওয়েবসাইটের সাইটম্যাপ লিঙ্ক
     sitemaps = [
         "https://www.banglachotikahinii.com/post-sitemap.xml",
-        "https://www.golpoguchho.com/post-sitemap.xml",
+        "https://banglaxchotikahini.com/post-sitemap.xml",
         # Bakigulo eikhane add korun...
     ]
     
