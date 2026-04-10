@@ -1,0 +1,34 @@
+name: Story Auto Collector
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # প্রতি ৬ ঘণ্টা পর পর অটো চলবে
+  workflow_dispatch: # এটি থাকলে আপনি নিজেও বাটন টিপে রান করতে পারবেন
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: Run Scraper
+        run: python scraper.py # আপনার পাইথন ফাইলের নাম scraper.py হতে হবে
+
+      - name: Save and Push Changes
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add stories.json
+          git commit -m "Auto Update: New Stories Collected" || exit 0
+          git push
+          
