@@ -1,34 +1,42 @@
-name: Story Auto Collector
+name: Story XML Scraper Bot
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # প্রতি ৬ ঘণ্টা পর পর অটো চলবে
-  workflow_dispatch: # এটি থাকলে আপনি নিজেও বাটন টিপে রান করতে পারবেন
+    - cron: '0 */6 * * *' # প্রতি ৬ ঘণ্টা পর পর এটি অটোমেটিক চলবে
+  workflow_dispatch: # এটি আপনাকে ম্যানুয়ালি 'Run Workflow' বাটন দিয়ে চালানোর সুযোগ দেবে
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # ১. রিপোজিটরি কোড চেকআউট করা
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # ২. পাইথন সেটআপ করা
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
+      # ৩. প্রয়োজনীয় লাইব্রেরি ইনস্টল করা (lxml সহ যা XML পড়তে সাহায্য করে)
       - name: Install Dependencies
         run: |
-          pip install requests beautifulsoup4
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml
 
-      - name: Run Scraper
-        run: python scraper.py # আপনার পাইথন ফাইলের নাম scraper.py হতে হবে
+      # ৪. পাইথন স্ক্র্যাপার স্ক্রিপ্টটি রান করা
+      - name: Run Scraper Script
+        run: python scraper.py
 
-      - name: Save and Push Changes
+      # ৫. পরিবর্তনগুলো সেভ করে পুশ করা
+      - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
+          git config --global user.email "actions@github.com"
           git add stories.json
-          git commit -m "Auto Update: New Stories Collected" || exit 0
+          # যদি কোনো নতুন গল্প না পাওয়া যায় তবে এরর এড়ানোর জন্য '|| exit 0' ব্যবহার করা হয়েছে
+          git commit -m "Auto Update: New stories collected from XML" || exit 0
           git push
           
