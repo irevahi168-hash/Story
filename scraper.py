@@ -3,63 +3,58 @@ from bs4 import BeautifulSoup
 import json
 import os
 
-def scrape_from_xml():
-    # এখানে আপনার টার্গেট ওয়েবসাইটের সাইটম্যাপ (Sitemap XML) লিঙ্ক দিন
+def scrape_full_stories():
+    # XML/Sitemap লিঙ্ক
     xml_url = "https://banglaxchotikahini.com/post-sitemap.xml" 
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
     
     try:
-        print("Fetching XML...")
+        print("Fetching Sitemap...")
         response = requests.get(xml_url, headers=headers)
-        # XML ফাইল পার্স করা
         soup = BeautifulSoup(response.content, 'xml')
         
-        # XML থেকে সব <loc> ট্যাগ (লিঙ্ক) বের করা
-        all_links = [loc.text for loc in soup.find_all('loc')]
-        print(f"Total links found: {len(all_links)}")
+        # প্রথম ৫-১০টি গল্পের লিঙ্ক নিচ্ছি (বেশি নিলে ফাইল সাইজ অনেক বড় হয়ে যাবে)
+        all_links = [loc.text for loc in soup.find_all('loc')][1:8] 
 
         stories = []
-        # আমরা প্রথম ১০-১৫টি লিঙ্কে ঢুকে গল্প কালেক্ট করব (বেশি নিলে টাইম আউট হতে পারে)
-        for index, link in enumerate(all_links[1:15]): 
+        for index, link in enumerate(all_links):
             try:
-                print(f"Scraping link: {link}")
+                print(f"Scraping Full Story: {link}")
                 res = requests.get(link, headers=headers)
                 story_soup = BeautifulSoup(res.text, 'html.parser')
                 
-                # টাইটেল এবং কন্টেন্ট খোঁজা (সাইট ভেদে এই ক্লাসগুলো পাল্টাতে হতে পারে)
                 title = story_soup.find('h1').text.strip() if story_soup.find('h1') else "শিরোনামহীন"
                 
-                # গল্পের মেইন বডি খোঁজা
-                content_div = story_soup.find('div', class_='entry-content') or story_soup.find('article')
+                # গল্পের পুরো বডি কালেক্ট করা
+                content_div = story_soup.find('div', class_='entry-content')
                 if content_div:
-                    # প্রথম ৫০০ ক্যারেক্টার নেওয়া হচ্ছে প্রিভিউ হিসেবে
-                    content = content_div.text.strip()[:600] + "..."
+                    # অপ্রয়োজনীয় ট্যাগ (বিজ্ঞাপন, সোশ্যাল শেয়ার) মুছে ফেলা
+                    for tag in content_div(['script', 'style', 'aside', 'ins']):
+                        tag.decompose()
+                    
+                    # পুরো গল্পটি নেওয়া হচ্ছে
+                    full_text = content_div.get_text(separator="\n").strip()
                 else:
-                    content = "বিস্তারিত গল্পের লিঙ্কে গিয়ে পড়ুন।"
+                    full_text = "দুঃখিত, গল্পের লেখাটি পাওয়া যায়নি।"
 
                 stories.append({
                     "id": index,
                     "title": title,
-                    "content": content,
-                    "link": link,
+                    "content": full_text, # এখানে এখন পুরো গল্প থাকবে
                     "author": "সংগৃহীত",
-                    "source": "XML Bot"
+                    "source": "গল্পের আসর"
                 })
             except Exception as e:
-                print(f"Error scraping {link}: {e}")
+                print(f"Error: {e}")
                 continue
 
         # JSON ফাইলে সেভ করা
-        if stories:
-            with open('stories.json', 'w', encoding='utf-8') as f:
-                json.dump(stories, f, ensure_ascii=False, indent=4)
-            print(f"Successfully saved {len(stories)} stories to stories.json")
-        else:
-            print("No stories were collected.")
+        with open('stories.json', 'w', encoding='utf-8') as f:
+            json.dump(stories, f, ensure_ascii=False, indent=4)
+        print("Done! Full stories saved.")
 
     except Exception as e:
-        print(f"Main XML Error: {e}")
+        print(f"Main Error: {e}")
 
 if __name__ == "__main__":
-    scrape_from_xml()
-    
+    scrape_full_stories()
