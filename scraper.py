@@ -57,7 +57,7 @@ def scrape_stories():
                             "title": title,
                             "content": full_text,
                             "author": "সংগৃহীত",
-                            "source": sitemap_url.split('/')[2]
+                            "source": "unknown",
                         }
                         
                         all_stories.append(new_story)
