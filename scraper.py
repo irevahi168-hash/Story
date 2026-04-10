@@ -35,8 +35,8 @@ def scrape_multipage_site(base_url, pages=3):
 def main():
     # Jey jey site theke collect korben tader list
     target_sites = [
-        "https://site-one.com/bangla-golpo",
-        "https://site-two.com/anubad-golpo"
+        "https://banglaxchotikahini.com/",
+        "https://chotigolpo.club/"
     ]
     
     final_data = []
