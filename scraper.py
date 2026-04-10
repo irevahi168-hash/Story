@@ -6,7 +6,7 @@ import os
 def scrape_stories():
     # ৫টি ওয়েবসাইটের সাইটম্যাপ লিঙ্ক
     sitemaps = [
-        "https://www.ebanglalibrary.com/post-sitemap.xml",
+        "https://www.banglachotikahinii.com/post-sitemap.xml",
         "https://www.golpoguchho.com/post-sitemap.xml",
         # Bakigulo eikhane add korun...
     ]
