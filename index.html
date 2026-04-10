@@ -3,91 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>গল্পের বিস্তারিত - গল্পের আসর</title>
+    <title>গল্পের আসর - আপনার প্রিয় গল্পের ভাণ্ডার</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Anek Bangla', sans-serif; background-color: #fcf8f3; }
-        .content-area { line-height: 1.8; font-size: 1.15rem; color: #333; }
-        .story-container { background: white; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        body {
+            font-family: 'Anek Bangla', sans-serif;
+            background-color: #f9f5f0;
+            scroll-behavior: smooth;
+        }
+        .story-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .story-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        /* পেজ রিলোড সমস্যা এড়াতে স্মুথ লোডিং */
+        #loader { display: none; }
+        .loading #loader { display: block; }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <nav class="bg-[#603813] text-white p-4 shadow-md">
-        <div class="container mx-auto">
-            <a href="index.html" class="text-xl font-bold"><i class="fa-solid fa-arrow-left mr-2"></i> গল্পের <span class="text-amber-400">আসর</span></a>
+    <nav class="bg-[#4a2c10] text-white p-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold tracking-tighter">
+                গল্পের <span class="text-amber-400">আসর</span>
+            </a>
+            <div class="hidden md:flex gap-6 text-sm font-semibold uppercase">
+                <a href="index.html" class="text-amber-400">হোম</a>
+                <a href="#" class="hover:text-amber-400 transition">বিভাগ</a>
+                <a href="#" class="hover:text-amber-400 transition">লেখক</a>
+            </div>
         </div>
     </nav>
 
-    <main class="container mx-auto py-10 px-4 max-w-3xl">
-        <div id="story-full-content" class="story-container p-6 md:p-12 rounded-xl">
-            <div id="loader" class="text-center py-20">
-                <i class="fas fa-spinner fa-spin text-3xl text-amber-600"></i>
-                <p class="mt-4">গল্পটি সাজানো হচ্ছে...</p>
-            </div>
+    <header class="bg-[#603813] py-16 px-4 text-center text-white">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4">হারিয়ে যান গল্পের মায়াজালে</h2>
+        <p class="text-amber-100 max-w-2xl mx-auto opacity-80">সেরা সব সংগৃহীত গল্পের এক বিশাল ডিজিটাল সংকলন। আপনার সময় কাটুক সাহিত্যের সাথে।</p>
+    </header>
+
+    <main class="container mx-auto py-12 px-4 min-h-screen">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="h-8 w-1.5 bg-[#4a2c10]"></div>
+            <h3 class="text-2xl font-bold text-[#4a2c10]">সাম্প্রতিক গল্পসমূহ</h3>
         </div>
 
-        <div class="mt-10 text-center">
-            <a href="index.html" class="bg-[#603813] text-white px-8 py-3 rounded-full font-bold hover:bg-amber-800 transition shadow-lg">
-                আরও গল্প পড়ুন
-            </a>
+        <div id="story-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="animate-pulse bg-white p-6 rounded-lg h-64 border border-gray-200"></div>
+            <div class="animate-pulse bg-white p-6 rounded-lg h-64 border border-gray-200"></div>
+            <div class="animate-pulse bg-white p-6 rounded-lg h-64 border border-gray-200"></div>
         </div>
     </main>
 
+    <footer class="bg-[#1a1108] text-gray-400 py-12 px-4 text-center border-t border-amber-900/20">
+        <div class="container mx-auto">
+            <h4 class="text-white font-bold mb-4">গল্পের আসর</h4>
+            <p class="text-sm mb-6 max-w-md mx-auto">এখানে প্রকাশিত সকল গল্প বিভিন্ন সোর্স থেকে স্বয়ংক্রিয়ভাবে সংগৃহীত।</p>
+            <p class="text-xs italic text-gray-600">Developed with ❤️ by Kabir</p>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-xs">
+                &copy; 2026 Golpo Ashor - All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
     <script>
-        async function loadStoryDetail() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const storyId = urlParams.get('id');
-            const contentDiv = document.getElementById('story-full-content');
+        // রিলোড সমস্যা প্রতিরোধের জন্য ভেরিয়েবল
+        let dataLoaded = false;
 
-            if (storyId === null) {
-                window.location.href = 'index.html';
-                return;
-            }
+        async function fetchStories() {
+            if (dataLoaded) return; // একবার লোড হলে পুনরায় রান হবে না
 
+            const grid = document.getElementById('story-grid');
+            
             try {
-                const response = await fetch('stories.json?v=' + Date.now());
+                // ক্যাশ সমস্যা এড়াতে একটি স্ট্যাটিক ভার্সন প্যারামিটার ব্যবহার করা হলো
+                const response = await fetch('stories.json?v=1.0.1');
+                
+                if (!response.ok) throw new Error("JSON load failed");
+                
                 const stories = await response.json();
-                const story = stories[storyId];
+                
+                grid.innerHTML = ''; // স্কেলেটন সরানো হলো
 
-                if (!story) {
-                    contentDiv.innerHTML = "<h2 class='text-center text-red-600 text-2xl font-bold py-20'>দুঃখিত! গল্পটি খুঁজে পাওয়া যায়নি।</h2>";
+                if (!stories || stories.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-20">
+                            <i class="fas fa-book-open text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 italic">এখনো কোনো গল্প জমা হয়নি। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।</p>
+                        </div>`;
                     return;
                 }
 
-                // UI Update
-                document.title = story.title + " - গল্পের আসর";
-                contentDiv.innerHTML = `
-                    <div class="mb-8 border-b pb-6">
-                        <span class="text-amber-700 font-bold uppercase tracking-widest text-xs">${story.source || 'Bangla Story'}</span>
-                        <h1 class="text-3xl md:text-5xl font-bold text-gray-900 mt-2 mb-4 leading-tight">${story.title}</h1>
-                        <div class="flex items-center text-gray-500 text-sm italic">
-                            <i class="fa-solid fa-pen-nib mr-2"></i> লেখক: ${story.author || 'অজ্ঞাত'}
-                        </div>
-                    </div>
-                    
-                    <div class="content-area whitespace-pre-line">
-                        ${story.content}
-                    </div>
+                stories.forEach((story, index) => {
+                    // গল্পের কন্টেন্টের প্রথম ১৫০ ক্যারেক্টার প্রিভিউ হিসেবে দেখানো
+                    const previewText = story.content.substring(0, 150).replace(/<[^>]*>?/gm, '');
 
-                    <div class="mt-12 pt-6 border-t flex justify-between items-center text-gray-400 text-sm">
-                        <span>সংগৃহীত গল্প</span>
-                        <div class="flex gap-4">
-                            <i class="fab fa-facebook hover:text-blue-600 cursor-pointer text-xl"></i>
-                            <i class="fab fa-whatsapp hover:text-green-600 cursor-pointer text-xl"></i>
-                        </div>
-                    </div>
-                `;
+                    grid.innerHTML += `
+                        <article class="story-card bg-white p-7 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-1 rounded-md font-bold uppercase tracking-widest">
+                                        ${story.source || 'Bangla'}
+                                    </span>
+                                </div>
+                                <h4 class="text-xl font-bold mb-4 text-gray-900 leading-tight hover:text-[#603813] cursor-pointer transition">
+                                    ${story.title}
+                                </h4>
+                                <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-6">
+                                    ${previewText}...
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between mt-auto pt-5 border-t border-gray-50">
+                                <span class="text-xs text-gray-400 italic">
+                                    <i class="fa-solid fa-feather-pointed mr-1"></i> ${story.author || 'সংগৃহীত'}
+                                </span>
+                                <a href="story-details.html?id=${index}" class="inline-flex items-center text-[#603813] font-bold text-sm hover:gap-2 transition-all">
+                                    আরও পড়ুন <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+                                </a>
+                            </div>
+                        </article>
+                    `;
+                });
+
+                dataLoaded = true;
 
             } catch (error) {
                 console.error("Error:", error);
-                contentDiv.innerHTML = "<p class='text-red-500 text-center'>গল্প লোড করতে সমস্যা হয়েছে।</p>";
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-20 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-3xl mb-2"></i>
+                        <p class="font-bold">গল্পগুলো লোড করা সম্ভব হয়নি।</p>
+                        <p class="text-xs text-gray-500 mt-1">stories.json ফাইলটি চেক করুন অথবা কিছুক্ষণ পর রিফ্রেশ দিন।</p>
+                    </div>`;
             }
         }
 
-        window.onload = loadStoryDetail;
+        // পেজ লোড হওয়া শেষ হলে একবারই রান করবে
+        window.addEventListener('load', fetchStories);
     </script>
 </body>
 </html>
