@@ -10,7 +10,7 @@ def scrape_stories():
         "https://banglaxchotikahini.com/post-sitemap.xml",
         "https://bdsexstory.online/post-sitemap.xml",
         "https://chotigolpo.club/post-sitemap.xml",
-        "https://banglaxchotikahini.com/post-sitemap.xml",
+        "https://www.banglapanugolpo.com/post-sitemap.xml",
         # Bakigulo eikhane add korun...
     ]
     
