@@ -1,0 +1,36 @@
+name: Hourly Sitemap Update
+
+on:
+  schedule:
+    # Prottek ghontay auto-run hobe
+    - cron: '0 * * * *'
+  push:
+    branches:
+      - main  # Main branch-e push korleo update hobe
+
+jobs:
+  sitemap_generator:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+
+      - name: Generate Sitemap
+        uses: cicirello/generate-sitemap@v1
+        with:
+          base-url-path: https://stories.tndx.fun/
+          path-to-root: .
+          # Jader extension (.html) nai tadero add korbe
+          include-html-extension: true 
+          # Jodi apnar file gulo folder e thake shetao scan korbe
+          include-pdf: false
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add sitemap.xml
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Hourly sitemap auto-update" && git push)
+          
