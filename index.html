@@ -27,9 +27,6 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        /* পেজ রিলোড সমস্যা এড়াতে স্মুথ লোডিং */
-        #loader { display: none; }
-        .loading #loader { display: block; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -77,65 +74,36 @@
     </footer>
 
     <script>
-        // রিলোড সমস্যা প্রতিরোধের জন্য ভেরিয়েবল
-        let dataLoaded = false;
+        let allStories = [];
+
+        // Seeded Shuffle: ঘণ্টার ওপর ভিত্তি করে গল্পের পজিশন পরিবর্তন করবে
+        function seededShuffle(array, seed) {
+            let m = array.length, t, i;
+            while (m) {
+                // গাণিতিক ভাবে ফিক্সড র‍্যান্ডমনেস তৈরি করা
+                i = Math.floor(Math.abs(Math.sin(seed++) * m--));
+                t = array[m];
+                array[m] = array[i];
+                array[i] = t;
+            }
+            return array;
+        }
 
         async function fetchStories() {
-            if (dataLoaded) return; // একবার লোড হলে পুনরায় রান হবে না
-
             const grid = document.getElementById('story-grid');
             
             try {
-                // ক্যাশ সমস্যা এড়াতে একটি স্ট্যাটিক ভার্সন প্যারামিটার ব্যবহার করা হলো
-                const response = await fetch('stories.json?v=1.0.1');
-                
+                // ক্যাশ রিফ্রেশ এবং ডেটা ফেচ
+                const response = await fetch('stories.json?v=' + new Date().getHours());
                 if (!response.ok) throw new Error("JSON load failed");
                 
-                const stories = await response.json();
+                allStories = await response.json();
                 
-                grid.innerHTML = ''; // স্কেলেটন সরানো হলো
-
-                if (!stories || stories.length === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-full text-center py-20">
-                            <i class="fas fa-book-open text-4xl text-gray-300 mb-4"></i>
-                            <p class="text-gray-500 italic">এখনো কোনো গল্প জমা হয়নি। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।</p>
-                        </div>`;
-                    return;
-                }
-
-                stories.forEach((story, index) => {
-                    // গল্পের কন্টেন্টের প্রথম ১৫০ ক্যারেক্টার প্রিভিউ হিসেবে দেখানো
-                    const previewText = story.content.substring(0, 150).replace(/<[^>]*>?/gm, '');
-
-                    grid.innerHTML += `
-                        <article class="story-card bg-white p-7 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-4">
-                                    <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-1 rounded-md font-bold uppercase tracking-widest">
-                                        ${story.source || 'Bangla'}
-                                    </span>
-                                </div>
-                                <h4 class="text-xl font-bold mb-4 text-gray-900 leading-tight hover:text-[#603813] cursor-pointer transition">
-                                    ${story.title}
-                                </h4>
-                                <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-6">
-                                    ${previewText}...
-                                </p>
-                            </div>
-                            <div class="flex items-center justify-between mt-auto pt-5 border-t border-gray-50">
-                                <span class="text-xs text-gray-400 italic">
-                                    <i class="fa-solid fa-feather-pointed mr-1"></i> ${story.author || 'সংগৃহীত'}
-                                </span>
-                                <a href="story-details.html?id=${index}" class="inline-flex items-center text-[#603813] font-bold text-sm hover:gap-2 transition-all">
-                                    আরও পড়ুন <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
-                                </a>
-                            </div>
-                        </article>
-                    `;
-                });
-
-                dataLoaded = true;
+                // বর্তমান দিন এবং ঘণ্টাকে সিড (Seed) হিসেবে ব্যবহার করা হয়েছে
+                const now = new Date();
+                const currentSeed = parseInt(now.getFullYear().toString() + (now.getMonth() + 1) + now.getDate() + now.getHours());
+                
+                renderStories(currentSeed);
 
             } catch (error) {
                 console.error("Error:", error);
@@ -143,12 +111,51 @@
                     <div class="col-span-full text-center py-20 text-red-500">
                         <i class="fas fa-exclamation-triangle text-3xl mb-2"></i>
                         <p class="font-bold">গল্পগুলো লোড করা সম্ভব হয়নি।</p>
-                        <p class="text-xs text-gray-500 mt-1">stories.json ফাইলটি চেক করুন অথবা কিছুক্ষণ পর রিফ্রেশ দিন।</p>
                     </div>`;
             }
         }
 
-        // পেজ লোড হওয়া শেষ হলে একবারই রান করবে
+        function renderStories(seed) {
+            const grid = document.getElementById('story-grid');
+            
+            // অরিজিনাল লিস্ট কপি করে সিড অনুযায়ী শাফেল করা
+            const displayStories = seededShuffle([...allStories], seed);
+            
+            grid.innerHTML = ''; // স্কেলেটন সরানো হলো
+
+            displayStories.forEach((story) => {
+                // র‍্যান্ডম হওয়ার পর আইডি ঠিক রাখতে টাইটেল দিয়ে অরিজিনাল ইনডেক্স খুঁজে বের করা
+                const originalIndex = allStories.findIndex(s => s.title === story.title);
+                const previewText = story.content.substring(0, 150).replace(/<[^>]*>?/gm, '');
+
+                grid.innerHTML += `
+                    <article class="story-card bg-white p-7 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-1 rounded-md font-bold uppercase tracking-widest">
+                                    ${story.source || 'Bangla'}
+                                </span>
+                            </div>
+                            <h4 class="text-xl font-bold mb-4 text-gray-900 leading-tight hover:text-[#603813] cursor-pointer transition">
+                                ${story.title}
+                            </h4>
+                            <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-6">
+                                ${previewText}...
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto pt-5 border-t border-gray-50">
+                            <span class="text-xs text-gray-400 italic">
+                                <i class="fa-solid fa-feather-pointed mr-1"></i> ${story.author || 'সংগৃহীত'}
+                            </span>
+                            <a href="story-details.html?id=${originalIndex}" class="inline-flex items-center text-[#603813] font-bold text-sm hover:gap-2 transition-all">
+                                আরও পড়ুন <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+                            </a>
+                        </div>
+                    </article>
+                `;
+            });
+        }
+
         window.addEventListener('load', fetchStories);
     </script>
 </body>
