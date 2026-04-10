@@ -79,7 +79,7 @@
                     <script type="text/javascript" src="https://www.highperformanceformat.com/5e1e647770544994278e05a287ff9727/invoke.js"><\/script>
                 </div>`;
 
-            grid.innerHTML += adCode; // শুরুতে অ্যাড
+            grid.innerHTML += adCode; 
 
             displayStories.forEach((story, index) => {
                 const originalIndex = allStories.findIndex(s => s.title === story.title);
@@ -88,16 +88,18 @@
                 grid.innerHTML += `
                     <article class="story-card bg-white p-7 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
                         <div>
-                            <h4 class="text-xl font-bold mb-4 text-gray-900">${story.title}</h4>
+                            <h4 class="text-xl font-bold mb-4 text-gray-900 hover:text-[#603813] transition cursor-pointer">
+                                <a href="story-details.html?id=${originalIndex}">${story.title}</a>
+                            </h4>
                             <p class="text-gray-600 text-sm line-clamp-3 mb-6">${previewText}...</p>
                         </div>
                         <div class="flex items-center justify-between pt-5 border-t">
                             <span class="text-xs text-gray-400">${story.author || 'সংগৃহীত'}</span>
-                            <a href="story-details.html?id=${originalIndex}" class="text-[#603813] font-bold text-sm">আরও পড়ুন</a>
+                            <a href="story-details.html?id=${originalIndex}" class="text-[#603813] font-bold text-sm hover:underline">আরও পড়ুন</a>
                         </div>
                     </article>`;
                 
-                if ((index + 1) % 6 === 0) grid.innerHTML += adCode; // প্রতি ৬ কার্ড পর পর অ্যাড
+                if ((index + 1) % 6 === 0) grid.innerHTML += adCode;
             });
         }
         window.addEventListener('load', fetchStories);
