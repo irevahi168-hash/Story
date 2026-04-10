@@ -30,4 +30,3 @@ jobs:
           git add stories.json
           git commit -m "Auto Update: New unique stories added" || exit 0
           git push
-          
