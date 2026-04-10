@@ -8,7 +8,7 @@ def scrape_stories():
     sitemaps = [
         "https://www.banglachotikahinii.com/post-sitemap.xml",
         "https://banglaxchotikahini.com/post-sitemap.xml",
-        "https://banglaxchotikahini.com/post-sitemap.xml",
+        "https://bdsexstory.online/post-sitemap.xml",
         "https://banglaxchotikahini.com/post-sitemap.xml",
         "https://banglaxchotikahini.com/post-sitemap.xml",
         # Bakigulo eikhane add korun...
