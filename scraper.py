@@ -3,62 +3,63 @@ from bs4 import BeautifulSoup
 import json
 import os
 
-def scrape_multipage_site(base_url, pages=3):
-    all_stories = []
-    for page in range(1, pages + 1):
-        try:
-            # Example: https://site.com/stories?page=1
-            url = f"{base_url}?page={page}" 
-            res = requests.get(url, timeout=10)
-            soup = BeautifulSoup(res.text, 'html.parser')
-            
-            # Website er structure onujayi selector dite hobe
-            items = soup.find_all('article', class_='post-item') 
-            
-            for item in items:
-                title = item.find('h2').text.strip()
-                content = item.find('p').text.strip()
-                link = item.find('a')['href']
+def scrape_from_xml():
+    # এখানে আপনার টার্গেট ওয়েবসাইটের সাইটম্যাপ (Sitemap XML) লিঙ্ক দিন
+    xml_url = "https://banglaxchotikahini.com/post-sitemap.xml" 
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    try:
+        print("Fetching XML...")
+        response = requests.get(xml_url, headers=headers)
+        # XML ফাইল পার্স করা
+        soup = BeautifulSoup(response.content, 'xml')
+        
+        # XML থেকে সব <loc> ট্যাগ (লিঙ্ক) বের করা
+        all_links = [loc.text for loc in soup.find_all('loc')]
+        print(f"Total links found: {len(all_links)}")
+
+        stories = []
+        # আমরা প্রথম ১০-১৫টি লিঙ্কে ঢুকে গল্প কালেক্ট করব (বেশি নিলে টাইম আউট হতে পারে)
+        for index, link in enumerate(all_links[1:15]): 
+            try:
+                print(f"Scraping link: {link}")
+                res = requests.get(link, headers=headers)
+                story_soup = BeautifulSoup(res.text, 'html.parser')
                 
-                all_stories.append({
+                # টাইটেল এবং কন্টেন্ট খোঁজা (সাইট ভেদে এই ক্লাসগুলো পাল্টাতে হতে পারে)
+                title = story_soup.find('h1').text.strip() if story_soup.find('h1') else "শিরোনামহীন"
+                
+                # গল্পের মেইন বডি খোঁজা
+                content_div = story_soup.find('div', class_='entry-content') or story_soup.find('article')
+                if content_div:
+                    # প্রথম ৫০০ ক্যারেক্টার নেওয়া হচ্ছে প্রিভিউ হিসেবে
+                    content = content_div.text.strip()[:600] + "..."
+                else:
+                    content = "বিস্তারিত গল্পের লিঙ্কে গিয়ে পড়ুন।"
+
+                stories.append({
+                    "id": index,
                     "title": title,
                     "content": content,
                     "link": link,
-                    "source": base_url.split('//')[1].split('/')[0]
+                    "author": "সংগৃহীত",
+                    "source": "XML Bot"
                 })
-            print(f"Scraped page {page} from {base_url}")
-        except Exception as e:
-            print(f"Error on {url}: {e}")
-            break
-    return all_stories
+            except Exception as e:
+                print(f"Error scraping {link}: {e}")
+                continue
 
-def main():
-    # Jey jey site theke collect korben tader list
-    target_sites = [
-        "https://banglaxchotikahini.com/",
-        "https://chotigolpo.club/"
-    ]
-    
-    final_data = []
-    for site in target_sites:
-        # Prottek site er 5 page porjonto collect korbe
-        site_data = scrape_multipage_site(site, pages=5) 
-        final_data.extend(site_data)
+        # JSON ফাইলে সেভ করা
+        if stories:
+            with open('stories.json', 'w', encoding='utf-8') as f:
+                json.dump(stories, f, ensure_ascii=False, indent=4)
+            print(f"Successfully saved {len(stories)} stories to stories.json")
+        else:
+            print("No stories were collected.")
 
-    # Purono data jate harale na jay, sheta handle kora
-    file_path = 'stories.json'
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            old_data = json.load(f)
-            # Notun ar purono data merge kora (Duplicate bad diye)
-            existing_titles = {s['title'] for s in old_data}
-            for story in final_data:
-                if story['title'] not in existing_titles:
-                    old_data.append(story)
-            final_data = old_data
-
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(final_data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        print(f"Main XML Error: {e}")
 
 if __name__ == "__main__":
-    main()
+    scrape_from_xml()
+    
