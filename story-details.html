@@ -7,98 +7,138 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Anek Bangla', sans-serif; background-color: #fcf8f3; }
-        .content-area { 
-            line-height: 2; 
-            font-size: 1.2rem; 
-            color: #2d3436; 
-            white-space: pre-line; /* প্যারাগ্রাফ ঠিক রাখার জন্য */
-        }
+        body { font-family: 'Anek Bangla', sans-serif; background-color: #f9f5f0; }
+        .content-area p { margin-bottom: 1.5rem; line-height: 1.8; font-size: 1.1rem; color: #374151; }
+        .suggestion-card { transition: all 0.3s ease; }
+        .suggestion-card:hover { background-color: #fffbeb; transform: translateX(5px); }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <nav class="bg-[#603813] text-white p-4 shadow-md">
-        <div class="container mx-auto flex items-center gap-4">
-            <a href="index.html" class="hover:text-amber-400 transition">
-                <i class="fa-solid fa-arrow-left text-xl"></i>
-            </a>
-            <h1 class="text-xl font-bold">গল্পের আসর</h1>
+    <nav class="bg-[#4a2c10] text-white p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold">গল্পের <span class="text-amber-400">আসর</span></a>
+            <a href="index.html" class="text-sm bg-amber-500 px-4 py-2 rounded-full hover:bg-amber-600 transition">সব গল্প</a>
         </div>
     </nav>
 
-    <main class="container mx-auto py-10 px-4 max-w-3xl">
-        <div id="story-wrapper" class="bg-white p-6 md:p-12 rounded-2xl shadow-lg border border-gray-100">
-            <div id="loader" class="text-center py-20">
-                <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-amber-700 mb-4"></div>
-                <p class="text-gray-500 italic">গল্পটি সাজানো হচ্ছে...</p>
-            </div>
-            
-            <div id="story-content" class="hidden">
-                <div class="mb-8 border-b border-gray-100 pb-6">
-                    <span id="story-source" class="text-amber-700 font-bold uppercase tracking-widest text-xs"></span>
-                    <h1 id="story-title" class="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4 leading-tight"></h1>
-                    <div class="text-gray-500 text-sm italic">
-                        <i class="fa-solid fa-feather-pointed mr-2"></i> লেখক: <span id="story-author"></span>
-                    </div>
+    <main class="container mx-auto py-10 px-4 max-w-4xl">
+        <div id="story-container" class="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100">
+            <div class="animate-pulse">
+                <div class="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/4 mb-10"></div>
+                <div class="space-y-4">
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6"></div>
                 </div>
-                
-                <div id="full-text" class="content-area"></div>
             </div>
         </div>
 
-        <div class="mt-10 text-center">
-            <a href="index.html" class="bg-[#603813] text-white px-10 py-3 rounded-full font-bold hover:bg-amber-800 transition shadow-lg inline-block">
-                আরও গল্প পড়ুন
-            </a>
+        <div class="mt-12">
+            <h3 class="text-xl font-bold text-[#4a2c10] mb-6 border-l-4 border-amber-500 pl-3">আরও কিছু চমৎকার গল্প</h3>
+            <div id="bottom-suggestions" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </main>
 
     <script>
-        async function loadStory() {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-            
-            const loader = document.getElementById('loader');
-            const storyContent = document.getElementById('story-content');
-
-            if (!id) {
-                window.location.href = 'index.html';
-                return;
+        // Seeded Shuffle Function
+        function seededShuffle(array, seed) {
+            let m = array.length, t, i;
+            while (m) {
+                i = Math.floor(Math.abs(Math.sin(seed++) * m--));
+                t = array[m]; array[m] = array[i]; array[i] = t;
             }
+            return array;
+        }
+
+        async function loadStoryDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const storyId = parseInt(params.get('id'));
+            const container = document.getElementById('story-container');
+            const bottomGrid = document.getElementById('bottom-suggestions');
 
             try {
-                // v=2.0 ব্যবহার করা হয়েছে যেন বারবার ক্যাশ রিফ্রেশ না করে
-                const response = await fetch('stories.json?v=2.0');
-                if (!response.ok) throw new Error("File not found");
+                const response = await fetch('stories.json?v=' + new Date().getHours());
+                const allStories = await response.json();
                 
-                const stories = await response.json();
-                const story = stories[parseInt(id)];
-
-                if (story) {
-                    // ডেটা বসানো হচ্ছে
-                    document.getElementById('story-title').innerText = story.title;
-                    document.getElementById('story-author').innerText = story.author || 'সংগৃহীত';
-                    document.getElementById('story-source').innerText = story.source || 'গল্প';
-                    document.getElementById('full-text').innerText = story.content;
-                    
-                    // লোডার সরিয়ে কন্টেন্ট দেখানো
-                    loader.style.display = 'none';
-                    storyContent.classList.remove('hidden');
-                    document.title = story.title + " - গল্পের আসর";
-                } else {
-                    loader.innerHTML = "<p class='text-red-500 font-bold'>দুঃখিত, গল্পটি পাওয়া যায়নি!</p>";
+                if (isNaN(storyId) || !allStories[storyId]) {
+                    container.innerHTML = `<p class="text-center text-red-500">গল্পটি খুঁজে পাওয়া যায়নি!</p>`;
+                    return;
                 }
-            } catch (err) {
-                console.error(err);
-                loader.innerHTML = "<p class='text-red-500'>গল্প লোড করতে সমস্যা হয়েছে। দয়া করে একটু পর চেষ্টা করুন।</p>";
+
+                const story = allStories[storyId];
+                
+                // ১. কন্টেন্ট ভাগ করা (মাঝখানে সাজেশন দেওয়ার জন্য)
+                const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
+                const midPoint = Math.ceil(paragraphs.length / 2);
+                
+                // ২. সাজেশন রেডি করা (বর্তমান গল্প বাদে বাকিগুলো থেকে ২-৪টি)
+                const now = new Date();
+                const seed = now.getFullYear() + now.getMonth() + now.getDate() + now.getHours();
+                let suggestions = allStories
+                    .map((s, index) => ({ ...s, originalIndex: index }))
+                    .filter((_, index) => index !== storyId);
+                
+                suggestions = seededShuffle(suggestions, seed);
+
+                // ৩. HTML জেনারেট করা
+                let storyHTML = `
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">${story.title}</h1>
+                    <div class="flex items-center text-sm text-gray-500 mb-8 pb-6 border-b border-gray-100">
+                        <span class="mr-4"><i class="fas fa-user-edit mr-1"></i> ${story.author || 'সংগৃহীত'}</span>
+                        <span><i class="fas fa-tags mr-1"></i> ${story.source || 'Bangla'}</span>
+                    </div>
+                    <div class="content-area">
+                `;
+
+                // প্রথম অর্ধেক কন্টেন্ট
+                paragraphs.slice(0, midPoint).forEach(p => {
+                    storyHTML += `<p>${p}</p>`;
+                });
+
+                // মাঝখানের সাজেশন বক্স
+                const midSuggestion = suggestions[0];
+                if (midSuggestion) {
+                    storyHTML += `
+                        <div class="my-10 p-6 bg-amber-50 rounded-2xl border-l-8 border-amber-400 shadow-sm">
+                            <span class="text-xs font-bold text-amber-700 uppercase tracking-widest">মাঝপথে বিরতি? এটিও পড়তে পারেন:</span>
+                            <h4 class="text-xl font-bold mt-2 text-gray-800">${midSuggestion.title}</h4>
+                            <a href="story-details.html?id=${midSuggestion.originalIndex}" class="inline-block mt-3 text-[#4a2c10] font-bold border-b-2 border-[#4a2c10] hover:text-amber-700 hover:border-amber-700 transition">পড়ুন <i class="fas fa-arrow-right ml-1"></i></a>
+                        </div>
+                    `;
+                }
+
+                // দ্বিতীয় অর্ধেক কন্টেন্ট
+                paragraphs.slice(midPoint).forEach(p => {
+                    storyHTML += `<p>${p}</p>`;
+                });
+
+                storyHTML += `</div>`;
+                container.innerHTML = storyHTML;
+
+                // ৪. নিচের সাজেশনগুলো রেন্ডার করা (পরের ৩টি)
+                suggestions.slice(1, 5).forEach(s => {
+                    bottomGrid.innerHTML += `
+                        <a href="story-details.html?id=${s.originalIndex}" class="suggestion-card bg-white p-5 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm">
+                            <div>
+                                <h5 class="font-bold text-gray-800 line-clamp-1">${s.title}</h5>
+                                <p class="text-xs text-gray-400 mt-1">${s.author || 'সংগৃহীত'}</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-amber-300 text-xs"></i>
+                        </a>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+                container.innerHTML = `<p class="text-center text-red-500">ডেটা লোড করতে সমস্যা হয়েছে।</p>`;
             }
         }
 
-        // DOMContentLoaded ব্যবহার করা হয়েছে যেন পেজ রেন্ডার হয়ে গেলেই কল হয়
-        document.addEventListener('DOMContentLoaded', loadStory);
+        window.addEventListener('load', loadStoryDetails);
     </script>
 </body>
 </html>
-
