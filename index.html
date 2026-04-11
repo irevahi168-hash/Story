@@ -33,6 +33,7 @@
         .story-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .story-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .tab-active { background-color: #603813; color: white; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -54,6 +55,15 @@
         <p class="text-amber-100 max-w-2xl mx-auto opacity-80">সেরা সব সংগৃহীত চটি গল্পের এক বিশাল ডিজিটাল সংকলন।</p>
     </header>
 
+    <div class="container mx-auto mt-8 px-4 flex justify-center gap-4">
+        <button onclick="switchTab('latest')" id="tab-latest" class="px-6 py-2 rounded-full border-2 border-[#603813] font-bold transition tab-active">
+            <i class="fas fa-clock mr-2"></i> সর্বশেষ
+        </button>
+        <button onclick="switchTab('random')" id="tab-random" class="px-6 py-2 rounded-full border-2 border-[#603813] font-bold transition text-[#603813] hover:bg-[#603813] hover:text-white">
+            <i class="fas fa-random mr-2"></i> এলোমেলো
+        </button>
+    </div>
+
     <main class="container mx-auto py-12 px-4 min-h-screen">
         <div id="story-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div class="animate-pulse bg-white p-6 rounded-lg h-64 border border-gray-200"></div>
@@ -67,33 +77,49 @@
 
     <script>
         let allStories = [];
+        let currentMode = 'latest'; // Default mode
 
-        function seededShuffle(array, seed) {
-            let m = array.length, t, i;
-            while (m) {
-                i = Math.floor(Math.abs(Math.sin(seed++) * m--));
-                t = array[m]; array[m] = array[i]; array[i] = t;
-            }
-            return array;
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
         }
 
         async function fetchStories() {
             const grid = document.getElementById('story-grid');
             try {
-                const response = await fetch('stories.json?v=' + new Date().getHours());
+                const response = await fetch('stories.json?v=' + new Date().getTime());
                 allStories = await response.json();
-                const now = new Date();
-                const currentSeed = parseInt(now.getFullYear().toString() + (now.getMonth() + 1) + now.getDate() + now.getHours());
-                renderStories(currentSeed);
+                renderStories();
             } catch (error) {
                 grid.innerHTML = `<p class="text-center text-red-500">Error loading stories.</p>`;
             }
         }
 
-        function renderStories(seed) {
+        function switchTab(mode) {
+            currentMode = mode;
+            
+            // বাটন স্টাইল পরিবর্তন
+            document.getElementById('tab-latest').classList.toggle('tab-active', mode === 'latest');
+            document.getElementById('tab-latest').classList.toggle('text-[#603813]', mode !== 'latest');
+            
+            document.getElementById('tab-random').classList.toggle('tab-active', mode === 'random');
+            document.getElementById('tab-random').classList.toggle('text-[#603813]', mode !== 'random');
+
+            renderStories();
+        }
+
+        function renderStories() {
             const grid = document.getElementById('story-grid');
-            const displayStories = seededShuffle([...allStories], seed);
             grid.innerHTML = ''; 
+
+            let storiesToDisplay = [];
+            
+            if (currentMode === 'latest') {
+                // লেটেস্ট মোড: আইডি অনুযায়ী উল্টো করে সাজানো (বড় থেকে ছোট)
+                storiesToDisplay = [...allStories].reverse();
+            } else {
+                // র‍্যান্ডম মোড: এলোমেলো সাজানো
+                storiesToDisplay = shuffleArray([...allStories]);
+            }
 
             const adCode = `
                 <div class="col-span-full flex justify-center my-4">
@@ -105,7 +131,8 @@
 
             grid.innerHTML += adCode; 
 
-            displayStories.forEach((story, index) => {
+            storiesToDisplay.forEach((story, index) => {
+                // অরিজিনাল ইনডেক্স খুঁজে বের করা লিঙ্ক ঠিক রাখার জন্য
                 const originalIndex = allStories.findIndex(s => s.title === story.title);
                 const previewText = story.content.substring(0, 150).replace(/<[^>]*>?/gm, '');
 
