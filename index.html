@@ -3,10 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>গল্পের আসর - আপনার প্রিয় গল্পের ভাণ্ডার</title>
+    
+    <title>Bangla Choti Golpo - সেরা সব চটি গল্পের ভাণ্ডার</title>
+    <meta name="description" content="সেরা সব সংগৃহীত বাংলা চটি গল্পের বিশাল ডিজিটাল সংকলন। প্রতিদিন নতুন নতুন চটি গল্প পড়ুন।">
+    <meta name="keywords" content="bangla choti, choti golpo, bangla choti story, চটি গল্প, বাংলা চটি, bangla panu, choti story list">
+    
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    
+    <meta name="rating" content="adult">
+    <meta name="RATING" content="RTA-5042-1996-1404-3035-G">
+
+    <meta property="og:locale" content="bn_BD">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Bangla Choti Golpo - সেরা সব চটি গল্পের ভাণ্ডার">
+    <meta property="og:description" content="সেরা সব সংগৃহীত বাংলা চটি গল্পের বিশাল ডিজিটাল সংকলন।">
+    <meta property="og:url" content="https://stories.tndx.fun/">
+    <meta property="og:site_name" content="Bangla Choti Golpo">
+    
+    <link rel="canonical" href="https://stories.tndx.fun/">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         body { font-family: 'Anek Bangla', sans-serif; background-color: #f9f5f0; scroll-behavior: smooth; }
         .story-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
@@ -18,7 +39,9 @@
 
     <nav class="bg-[#4a2c10] text-white p-4 sticky top-0 z-50 shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold tracking-tighter">গল্পের <span class="text-amber-400">আসর</span></a>
+            <a href="index.html" class="text-2xl font-bold tracking-tighter">
+                Bangla <span class="text-amber-400">Choti</span> Golpo
+            </a>
             <div class="hidden md:flex gap-6 text-sm font-semibold uppercase">
                 <a href="index.html" class="text-amber-400">হোম</a>
                 <a href="#" class="hover:text-amber-400 transition">বিভাগ</a>
@@ -27,8 +50,8 @@
     </nav>
 
     <header class="bg-[#603813] py-16 px-4 text-center text-white">
-        <h2 class="text-4xl md:text-5xl font-bold mb-4">হারিয়ে যান গল্পের মায়াজালে</h2>
-        <p class="text-amber-100 max-w-2xl mx-auto opacity-80">সেরা সব সংগৃহীত গল্পের এক বিশাল ডিজিটাল সংকলন।</p>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">হারিয়ে যান গল্পের মায়াজালে</h1>
+        <p class="text-amber-100 max-w-2xl mx-auto opacity-80">সেরা সব সংগৃহীত চটি গল্পের এক বিশাল ডিজিটাল সংকলন।</p>
     </header>
 
     <main class="container mx-auto py-12 px-4 min-h-screen">
@@ -38,6 +61,7 @@
     </main>
 
     <footer class="bg-[#1a1108] text-gray-400 py-12 px-4 text-center border-t border-amber-900/20">
+        <h4 class="text-white font-bold mb-2">Bangla Choti Golpo</h4>
         <p class="text-xs italic text-gray-600">Developed with ❤️ by Kabir</p>
     </footer>
 
@@ -88,9 +112,9 @@
                 grid.innerHTML += `
                     <article class="story-card bg-white p-7 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
                         <div>
-                            <h4 class="text-xl font-bold mb-4 text-gray-900 hover:text-[#603813] transition cursor-pointer">
+                            <h2 class="text-xl font-bold mb-4 text-gray-900 hover:text-[#603813] transition cursor-pointer">
                                 <a href="story-details.html?id=${originalIndex}">${story.title}</a>
-                            </h4>
+                            </h2>
                             <p class="text-gray-600 text-sm line-clamp-3 mb-6">${previewText}...</p>
                         </div>
                         <div class="flex items-center justify-between pt-5 border-t">
